@@ -1,3 +1,174 @@
+## Partie UDP
+
+1) Notez l’adresse IPv4 associée à l’interface ethernet de votre ordinateur avec la commande
+suivante : 
+```bash
+aymen.torche.etu@b05p20:~$ ip -brief address show
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+eth0             DOWN           
+eth1             UP             192.168.5.70/24 metric 100 fe80::266a:eff:fe77:6493/64 
+```
+
+ainsi notre ipv4 est : 127.0.0.1/128 
+
+
+à partir de ce moment on a lancé socklab via la commande : /home/share/applications/socklab/socklab 
+
+2) Lancez la commande suivante pour créer un socket UDP : socket udp. En retour, socklab vous renvoie le descripteur du socket. Notez ce chiffre car il sera utilisé pour manipuler ce socket.
+
+--> création d'un socket : 
+
+    socklab> socket udp
+    The socket identifier is 3
+
+3) Lancez la commande suivante pour afficher des informations sur le socket que vous venez de
+créer :
+```bash
+status ou = 
+
+socklab> =
+ Id  Proto   Local address              Remote address             TYPE  RWX ?
+ ---------------------------------------------------------------------------
+>3   UDP U   -                          -                          ipv4  .W.
+
+socklab> status
+ Id  Proto   Local address              Remote address             TYPE  RWX ?
+ ---------------------------------------------------------------------------
+>3   UDP U   -                          -                          ipv4  .W.
+```
+
+
+4) Utilisez la commande bind pour associer ce socket avec l’adresse IPv4 de votre ordinateur et avec
+le port 3000 : bind <id_socket> <adresse_ip> 3000 
+
+```bash
+socklab> bind 4 192.168.5.70
+Port? :  3000
+
+socklab> status
+ Id  Proto   Local address              Remote address             TYPE  RWX ?
+ ---------------------------------------------------------------------------
+ 3   UDP U   127.0.0.1(3000)            -                          ipv4  .W.
+>4   UDP U   192.168.5.70(3000)         -                          ipv4  .W.
+```
+
+--> On voit bien ici que l'adresse locale ainsi que le port ont été renseignés 
+
+5) La commande pour envoyer un message depuis un socket UDP vers une autre est : sendto <id_socket> <ip_dst> <port_dst> <msg>
+
+        id_socket : identifiant du socket local à utiliser pour envoyer le message
+        ip_dst : adresse IP de destination du message
+        ULille/FST/FIL - L3 S5 info/miage – X. Buche p. 1/7
+        port_dst : port de destination du message
+        msg : message à envoyer, au format ASCII et entre guillemets
+
+
+Envoyez un gentil message vers l’ordinateur de votre voisin. 
+```bash
+    socklab> sendto 4 192.168.5.69 44703 salut   
+    Sent 5 bytes
+
+    socklab> 
+```
+
+6) Quelles informations votre voisin doit-il vous fournir pour que vous puissiez lui envoyer un
+message ? 
+
+Son adresse ipv4 ( eth1 ) ainsi que le port via lequel il va recevoir le message 
+
+7) Une fois le message envoyé, il se trouve dans le buffer associé au socket de destination. Pour l’afficher, utilisez la commande : recvfrom <id_socket> <nb_octets>
+    id_socket : identifiant du socket de destination du message
+    nb_octets : nombre de caractères à lire dans le buffer
+
+
+8) Selon vous, il est préférable de laisser le système choisir le port sur la machine qui envoie le
+message initial, ou sur celui qui le reçoit, ou les deux ?
+
+--> Il est préférable de laisser le système choisir le port sur la machine qui envoie le message initial. Celui qui reçoit doit être fixé.  ( voir principe client-serveur ) 
+
+9) Supprimez le socket créé précédemment avec la commande :
+close <id_socket>
+
+```bash
+socklab> =
+ Id  Proto   Local address              Remote address             TYPE  RWX ?
+ ---------------------------------------------------------------------------
+ 4   UDP U   192.168.5.70(3000)         -                          ipv4  .W.
+
+socklab> close 4 
+
+socklab> = 
+No socket has been created yet.
+```
+
+
+10) Créez maintenant 2 sockets UDP et associez-les à toutes les adresses IP de votre machine et à un
+port libre choisi par le système.
+
+Vérifiez la configuration de vos sockets avec la commande « status ».
+
+Les sockets ont étés crées sur deux laboratoires socklab différents 
+
+Lab 1 : 
+```bash 
+socklab> socket udp
+The socket identifier is 3
+
+socklab> bind 3 * 0
+The socket was attributed port 44796.
+
+socklab> =
+ Id  Proto   Local address              Remote address             TYPE  RWX ?
+ ---------------------------------------------------------------------------
+>3   UDP U   *(44796)  
+```
+
+Lab 2 : 
+
+```bash
+
+socklab> bind 3 * 0
+The socket was attributed port 34954.
+
+socklab> =
+ Id  Proto   Local address              Remote address             TYPE  RWX ?
+ ---------------------------------------------------------------------------
+>3   UDP U   *(34954)    
+```
+
+11) Ouvrez un nouveau terminal et exécutez la commande suivante pour capturer la communication
+sur l’interface de loopback : sudo wireshark -i lo -f udp
+
+--> C'est fait et après un double clique sur loopback j'ai accès aux 3 onglets 
+
+12) Ouvrez un autre terminal et lancez la commande « ip address » pour connaître l’adresse IPv4
+associée à l’interface de loopback.
+
+inet 127.0.0.1/8 scope host lo
+
+
+15) 
+    1.  Vérifiez que l’adresse IP source et le port source correspondent au socket sur lequel les messages ont été envoyés.
+        Vérifiez que l’adresse IP de destination et le port de destination correspondent au socket sur lequel les messages ont été reçus.
+
+    On a bien toutes les informations
+
+    3. ip_src : 192.168.5.70 | ip_dest : 192.168.5.70  Message envoyé : Hello aymen
+       port_src : 44796      | port_dest : 34954 
+
+    4) Calculez l’efficacité du protocole, c’est-à-dire le rapport entre la taille des messages en octets et la taille totale des données transmises pour véhiculer ce message 
+       (valeur indiquée dans la ligne « frame » ( ici 440 bits ) de chaque trame dans Wireshark)
+
+        efficacité = taille totale du message ( des 3 frames ) / taille totale des 3 frames 
+
+       ( bon j'ai repris le TD ici et donc je n'ai pas respecté à 100% mes anciens travaux ) 
+
+       taille frame = 480 bits = 60
+       taille data = 16 
+
+       60/16 = 0,267
+
+       donc l'efficacité est de 0.267
 ## PARTIE TCP 
 
 ````markdown
@@ -312,6 +483,7 @@ L'un est plus efficace et l'autre plus sécurisé
 
 
 ---
+
 
 
 
