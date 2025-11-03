@@ -171,7 +171,6 @@ inet 127.0.0.1/8 scope host lo
        donc l'efficacité est de 0.267
 ## PARTIE TCP 
 
-````markdown
 # TP TCP – Socklab / Wireshark
 
 ## 1) Créez 2 sockets TCP associés à l’adresse IP de l’interface de loopback :
@@ -483,6 +482,7 @@ L'un est plus efficace et l'autre plus sécurisé
 
 
 ---
+
 
 
 
